@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# inverse filtering - 逆滤波
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt

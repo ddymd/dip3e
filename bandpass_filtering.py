@@ -37,11 +37,15 @@ def apply_bbp(fft, n, d0, w, plot: plt.Axes):
     M, N = np.shape(fft)
     uu,vv = int(M/2), int(N/2)
     H = np.ones((M,N))
+    H1 = np.ones((M,N))
+    H2 = np.ones((M,N))
     for u in range(M):
         for v in range(N):
             powD = (u-uu)**2 + (v-vv)**2
             H[u,v] = 1/(1+(np.sqrt(powD)*w/(powD-d0**2))**(2*n))
-    filtered_fft = H * fft
+            H1[u,v] = 1/(1+(np.sqrt(powD)*w/(powD-(d0-90)**2))**(2*n))
+            H2[u,v] = 1/(1+(np.sqrt(powD)*w/(powD-(d0+100)**2))**(2*n))
+    filtered_fft = H * fft * H1 * H2
 
     # H_show = np.uint8(255 * (H - np.min(H)) / (np.max(H) - np.min(H)))
     # print(H_show)
@@ -67,7 +71,7 @@ if __name__ == '__main__':
     plot.set_yticks([])
 
     fft = fft_im(im, figure.add_subplot(222))
-    im_back = apply_bbp(fft, 4, 350, 50, figure.add_subplot(223))
+    im_back = apply_bbp(fft, 3, 350, 100, figure.add_subplot(223))
 
     plotr = figure.add_subplot(224)
     plotr.set_title('results')

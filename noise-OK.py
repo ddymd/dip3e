@@ -85,6 +85,3 @@ if __name__ == '__main__':
     plotr2.set_yticks([])
 
     plt.show()
-
-
-

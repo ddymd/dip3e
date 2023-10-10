@@ -91,4 +91,3 @@ if __name__ == '__main__':
     # ps_im = add_pepper_salt(im)
     # cv2.imshow('ps_im', ps_im)
     show_fft(im)
-    cv2.waitKey()

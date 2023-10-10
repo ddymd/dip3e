@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 def fft_im(im, plot: plt.Axes):
     gray_im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     rows, cols = gray_im.shape[:2]
-    M, N = rows*2, cols*2
+    M, N = cv2.getOptimalDFTSize(rows), cv2.getOptimalDFTSize(cols)
+    print('origin size({0},{1}) vs padded size({2},{3})'.format(rows, cols, M, N))
     ext_im = np.zeros((M, N))
     ext_im[0:rows, 0:cols] = gray_im
     # fft and shift
@@ -78,8 +79,7 @@ def apply_notch(fft, d0, n, plot: plt.Axes):
 
     ifft_shift = np.fft.ifftshift(filtered_fft)
     ifft = np.fft.ifft2(ifft_shift)
-    crop = ifft[0:uu, 0:vv]
-    return np.abs(crop)
+    return np.abs(ifft)
 
 def apply_rect_notch(fft, plot: plt.Axes):
     M, N = np.shape(fft)
@@ -96,18 +96,18 @@ def apply_rect_notch(fft, plot: plt.Axes):
 
     ifft_shift = np.fft.ifftshift(filtered_fft)
     ifft = np.fft.ifft2(ifft_shift)
-    crop = ifft[0:uu, 0:vv]
 
+    filtered_fft[filtered_fft==0] = 1
     plot.set_title('filtering spectrum')
     plot.imshow(np.log(np.abs(filtered_fft)), cmap='gray')
     plot.set_xticks([])
     plot.set_yticks([])
 
-    return np.abs(crop)
+    return np.abs(ifft)
 
 def main_notch():
-    im = cv2.imread('DIP3E_Original_Images_CH04/Fig0464(a)(car_75DPI_Moire).tif')
-    # im = cv2.imread('d:\Algorithms\TEM\AMSImage5.jpg')
+    im = cv2.imread('CH04_Images/Fig0464(a)(car_75DPI_Moire).tif')
+    rows, cols = im.shape[:2]
     figure = plt.figure()
     ploto = figure.add_subplot(221)
     ploto.imshow(im)
@@ -117,6 +117,8 @@ def main_notch():
     fft = fft_im(im, figure.add_subplot(222))
 
     im_back = apply_notch(fft, 25, 4, figure.add_subplot(223))
+    # crop
+    im_back = im_back[0:rows, 0:cols]
 
     plotres = figure.add_subplot(224)
     plotres.imshow(im_back, cmap='gray')
@@ -126,7 +128,8 @@ def main_notch():
     plt.show()
 
 def main_rect():
-    im = cv2.imread('DIP3E_Original_Images_CH04/Fig0465(a)(cassini).tif')
+    im = cv2.imread('CH04_Images/Fig0465(a)(cassini).tif')
+    rows, cols = im.shape[:2]
     figure = plt.figure()
     ploto = figure.add_subplot(221)
     ploto.imshow(im)
@@ -136,6 +139,8 @@ def main_rect():
     fft = fft_im(im, figure.add_subplot(222))
 
     im_back = apply_rect_notch(fft, figure.add_subplot(223))
+    # crop
+    im_back = im_back[0:rows, 0:cols]
 
     plotres = figure.add_subplot(224)
     plotres.imshow(im_back, cmap='gray')

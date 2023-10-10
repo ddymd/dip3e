@@ -62,7 +62,7 @@ def apply_bbp(fft, n, d0, w, plot: plt.Axes):
 
 if __name__ == '__main__':
     # 获取不到一个准确的频谱
-    im = cv2.imread('DIP3E_CH05_Original_Images/Fig0516(a)(applo17_boulder_noisy).tif')
+    im = cv2.imread('CH05_Images/Fig0516(a)(applo17_boulder_noisy).tif')
     figure = plt.figure()
     plot = figure.add_subplot(221)
     plot.set_title('origin')

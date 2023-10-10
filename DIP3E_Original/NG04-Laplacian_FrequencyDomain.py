@@ -43,7 +43,7 @@ def apply_laps(fft):
 if __name__ == '__main__':
     figure = plt.figure()
 
-    im = cv2.imread('DIP3E_Original_Images_CH04/Fig0458(a)(blurry_moon).tif')
+    im = cv2.imread('CH04_Images/Fig0458(a)(blurry_moon).tif')
     gray_im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
     plot = figure.add_subplot(121)

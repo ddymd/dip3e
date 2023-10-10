@@ -18,9 +18,10 @@ def gaussian_noise(im, mean: float, standard_deviation: float):
 if __name__ == '__main__':
     figure = plt.figure()
 
-    im = cv2.imread('DIP3E_CH05_Original_Images/Fig0507(a)(ckt-board-orig).tif')
+    im = cv2.imread('CH05_Images/Fig0507(a)(ckt-board-orig).tif')
     im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
+    # 将图像添加均值为0, 方差为1000的高斯噪声
     gim = gaussian_noise(im, 0, np.sqrt(1000))
 
     ploto = figure.add_subplot(121)

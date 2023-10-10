@@ -88,27 +88,27 @@ if __name__ == '__main__':
     figure = plt.figure()
 
     # ------------- Part One
-    im_hs = cv2.imread('DIP3E_CH05_Original_Images/Fig0525(a)(aerial_view_no_turb).tif')
+    # im_hs = cv2.imread('CH05_Images/Fig0525(a)(aerial_view_no_turb).tif')
 
-    plot = figure.add_subplot(221)
-    plot.imshow(im_hs, cmap='gray')
-    plot.set_title('origin')
-    plot.set_xticks([])
-    plot.set_yticks([])
-
-    hs_degradation(im_hs, figure, 222, 0.0025)
-    hs_degradation(im_hs, figure, 223, 0.001)
-    hs_degradation(im_hs, figure, 224, 0.00025)
-
-    # ------------- Part Two
-    # im_mv = cv2.imread('DIP3E_CH05_Original_Images/Fig0526(a)(original_DIP).tif')
-
-    # plot = figure.add_subplot(121)
-    # plot.imshow(im_mv, cmap='gray')
+    # plot = figure.add_subplot(221)
+    # plot.imshow(im_hs, cmap='gray')
     # plot.set_title('origin')
     # plot.set_xticks([])
     # plot.set_yticks([])
 
-    # mv_degradation(im_mv, figure)
+    # hs_degradation(im_hs, figure, 222, 0.0025)
+    # hs_degradation(im_hs, figure, 223, 0.001)
+    # hs_degradation(im_hs, figure, 224, 0.00025)
+
+    # ------------- Part Two
+    im_mv = cv2.imread('CH05_Images/Fig0526(a)(original_DIP).tif')
+
+    plot = figure.add_subplot(121)
+    plot.imshow(im_mv, cmap='gray')
+    plot.set_title('origin')
+    plot.set_xticks([])
+    plot.set_yticks([])
+
+    mv_degradation(im_mv, figure)
 
     plt.show()

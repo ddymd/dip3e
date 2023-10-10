@@ -39,7 +39,7 @@ def reverse_filtering(im, mask: np.array):
     return np.abs(ifft)
 
 if __name__ == '__main__':
-    im = cv2.imread('DIP3E_CH05_Original_Images/Fig0525(b)(aerial_view_turb_c_0pt0025).tif')
+    im = cv2.imread('CH05_Images/Fig0525(b)(aerial_view_turb_c_0pt0025).tif')
     M, N = im.shape[:2]
     # print(M, N)
     mask = reverse_filter(M, N, 0.0025, 500)

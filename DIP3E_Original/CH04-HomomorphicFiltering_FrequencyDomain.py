@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 def fft_im(im, plot: plt.Axes):
     gray_im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     rows, cols = gray_im.shape[:2]
-    M, N = rows*2, cols*2
+    M, N = cv2.getOptimalDFTSize(rows), cv2.getOptimalDFTSize(cols)
+    print('origin size({0},{1}) vs padded size({2},{3})'.format(rows, cols, M, N))
     ext_im = np.zeros((M, N))
     ext_im[0:rows, 0:cols] = gray_im
     # fft and shift
@@ -39,14 +40,13 @@ def apply_homomorphic(fft, gamma_h, gamma_l, c, d0):
     filter_fft = H * fft
     ifft_shift = np.fft.ifftshift(filter_fft)
     ifft = np.fft.ifft2(ifft_shift)
-    crop = ifft[0:uu, 0:vv]
-    return np.abs(crop)
+    return np.abs(ifft)
 
 if __name__ == '__main__':
     figure = plt.figure()
 
-    im = cv2.imread('DIP3E_Original_Images_CH04/Fig0462(a)(PET_image).tif')
-
+    im = cv2.imread('CH04_Images/Fig0462(a)(PET_image).tif')
+    rows, cols = im.shape[:2]
     plot = figure.add_subplot(121)
     plot.set_title('origin')
     plot.set_xticks([])
@@ -54,6 +54,7 @@ if __name__ == '__main__':
     fft = fft_im(im, plot)
 
     im_back = apply_homomorphic(fft, 2, 0.25, 1, 80)
+    im_back = im_back[0:rows,0:cols]
 
     plot1 = figure.add_subplot(122)
     plot1.set_title('homomorphic')

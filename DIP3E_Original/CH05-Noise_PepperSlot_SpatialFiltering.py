@@ -31,6 +31,9 @@ def solt_noise(im, p: float):
     return ret
 
 def contraharmonic_mean_filter(im, Q: float, kernel):
+    """
+    逆谐波均值滤波器
+    """
     im[im==0] = 1
     numerator = np.power(im, Q+1)
     denominator = np.power(im, Q)
@@ -43,7 +46,7 @@ def contraharmonic_mean_filter(im, Q: float, kernel):
 if __name__ == '__main__':
     figure = plt.figure()
 
-    im = cv2.imread('DIP3E_CH05_Original_Images/Fig0507(a)(ckt-board-orig).tif')
+    im = cv2.imread('CH05_Images/Fig0507(a)(ckt-board-orig).tif')
     im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
     pim = pepper_noise(im, 0.1)
@@ -72,7 +75,7 @@ if __name__ == '__main__':
 
     plotr1 = figure.add_subplot(235)
     plotr1.imshow(r1, cmap='gray')
-    plotr1.set_title('solt noise')
+    plotr1.set_title('filtering on pepper noise')
     plotr1.set_xticks([])
     plotr1.set_yticks([])
 
@@ -80,8 +83,10 @@ if __name__ == '__main__':
 
     plotr2 = figure.add_subplot(236)
     plotr2.imshow(r2, cmap='gray')
-    plotr2.set_title('solt noise')
+    plotr2.set_title('filtering on slot noise')
     plotr2.set_xticks([])
     plotr2.set_yticks([])
+
+    figure.set_label('Contraharmonic mean spatial filtering')
 
     plt.show()

@@ -83,7 +83,7 @@
 (eval-when-compile
   (require 'use-package))
 
-;; 插件 - 功能优化类
+;; 插件 - 功能优化类 **********************************************************
 ;; ivy插件
 (use-package counsel
   :ensure t)
@@ -147,6 +147,34 @@
   :if window-system
   :init (good-scroll-mode))
 
+;; 插件 - 功增强类 ************************************************************
+;; Book marks
+;; C-x r m (bookmark-set)
+;; C-x r b (bookmark-jump)
+;; C-x r l (bookmark-bmenu-list)
+;; M-x (bookmark-delete)
+
+;; ivy view
+;; C-c v (ivy-push-view)
+;; C-c s (ivy-switch-view)
+;; C-c V (ivy-pop-view)
+
+;; which-key(optional)
+(use-package which-key
+  :ensure t
+  :init (which-key-mode))
+
+;; avy 无鼠标的光标跳转
+(use-package avy
+  :ensure t
+  :bind ("C-j C-SPC" . avy-goto-char-timer))
+
+;; marginalia 为minibuffer中的选项添加注解
+(use-package marginalia
+  :ensure t
+  :init (marginalia-mode)
+  :bind (:map minibuffer-local-map ("M-A" . marginalia-cycle)))
+
 ;; 编程模式下代码语法检查
 (use-package flycheck
  :ensure t
@@ -167,7 +195,7 @@
    '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default))
  '(ispell-dictionary nil)
  '(package-selected-packages
-   '(good-scroll smart-mode-line undo-tree mwim ace-window amx counsel ivy use-package)))
+   '(marginalia which-key good-scroll smart-mode-line undo-tree mwim ace-window amx counsel ivy use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

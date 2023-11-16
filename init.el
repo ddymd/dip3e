@@ -72,11 +72,14 @@
 ;; MELPA
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
+;; and `package-pinned-packages`. Most users will not need or want to do this.
+;;(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 (package-initialize)
 
 ;; (require 'package)
 ;; (setq package-archives '(("gnu"   . "http://mirrors.cloud.tencent.com/elpa/gnu/")
-;; 			 ("melpa" . "http://mirrors.cloud.tencent.com/elpa/melpa")))
+;;        ("melpa" . "http://mirrors.cloud.tencent.com/elpa/melpa")))
 ;; (package-initialize)
 
 ;; 插件设置 use-package
@@ -130,11 +133,26 @@
   ("C-a" . mwim-beginning-of-code-or-line)
   ("C-e" . mwim-end-of-code-or-line))
 
+;;hydra 组合特定场景的命令
+(use-package hydra :ensure t)
+(use-package use-package-hydra :ensure t :after hydra)
+
 ;; undo tree
 (use-package undo-tree
   :ensure t
   :init (global-undo-tree-mode)
-  :config (setq undo-tree-auto-save-history nil))
+  :config (setq undo-tree-auto-save-history nil)
+  :after hydra
+  :bind ("C-x C-h u" . hydra-undo-tree/body)
+  :hydra (hydra-undo-tree (:hint nil)
+  "
+  _p_: undo _n_: redo _s_: save _l_: load "
+  ("p" undo-tree-undo)
+  ("n" undo-tree-redo)
+  ("s" undo-tree-save-history)
+  ("l" undo-tree-load-history)
+  ("u" undo-tree-visualize "visualize" :color blue)
+  ("q" nil "quit" :color blue)))
 
 ;; smart mode line (optional)
 ;; (use-package smart-mode-line
@@ -167,6 +185,11 @@
 ;; avy 无鼠标的光标跳转
 (use-package avy
   :ensure t
+  :config
+  (defun avy-action-embark (pt)
+      (unwind-protect (save-excursion (goto-char pt) (embark-act))
+        (select-window (cdr (ring-ref avy-ring 0)))) t)
+  (setf (alist-get ?e avy-dispatch-alist) 'avy-action-embark)
   :bind ("C-j C-SPC" . avy-goto-char-timer))
 
 ;; marginalia 为minibuffer中的选项添加注解
@@ -174,6 +197,102 @@
   :ensure t
   :init (marginalia-mode)
   :bind (:map minibuffer-local-map ("M-A" . marginalia-cycle)))
+
+;; embark (optional)
+(use-package embark
+  :ensure t
+
+  :bind
+  (("M-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+  :init
+
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  ;; Show the Embark target at point via Eldoc.  You may adjust the Eldoc
+  ;; strategy, if you want to see the documentation from multiple providers.
+  ;;(add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+  ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+
+  :config
+
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :ensure t ; only need to install it, embark loads it after consult if found
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+;;multiple cursors 多光标编辑
+(use-package multiple-cursors
+  :ensure t
+  :after hydra
+  :bind
+  (("C-x C-h m" . hydra-multiple-cursors/body)
+   ("C-S-c C-S-c" . mc/edit-lines)
+   ("C->" . mc/mark-next-like-this)
+   ("C-<" . mc/mark-previous-like-this)
+   ("C-c C-<" . mc/mark-all-like-this)
+  ("C-S-<mouse-1>" . mc/toggle-cursor-on-click))
+  :hydra (hydra-multiple-cursors (:hint nil)
+          "
+Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cursor%s(if (> (mc/num-cursors) 1) \"s\" \"\")
+------------------------------------------------------------------
+ [_p_]   Prev like this        [_n_]   Next like this        [_l_] Edit lines  [_0_] Insert numbers
+ [_P_]   Skip prev like this   [_N_]   Skip next like this   [_a_] Mark all    [_A_] Insert letters
+ [_M-p_] Unmark prev like this [_M-n_] Unmark next like this [_s_] Mark all in region regexp
+ [_|_]   Align with input CHAR [Click] Cursor at point       [_q_] Quit"
+    ("l" mc/edit-lines :exit t)
+    ("a" mc/mark-all-like-this :exit t)
+    ("n" mc/mark-next-like-this)
+    ("N" mc/skip-to-next-like-this)
+    ("M-n" mc/unmark-next-like-this)
+    ("p" mc/mark-previous-like-this)
+    ("P" mc/skip-to-previous-like-this)
+    ("M-p" mc/unmark-previous-like-this)
+    ("|" mc/vertical-align)
+    ("s" mc/mark-all-in-region-regexp :exit t)
+    ("0" mc/insert-numbers :exit t)
+    ("A" mc/insert-letters :exit t)
+    ("<mouse-1>" mc/add-cursor-on-click)
+    ;; Help with click recognition in this hydra
+    ("<down-mouse-1>" ignore)
+    ("<drag-mouse-1>" ignore)
+    ("q" nil)))
+
+;; dashboard
+(use-package dashboard
+ :ensure t
+ :config
+ (setq dashboard-banner-logo-title "Welcome to Emacs!") ;; 个性签名，随读者喜好设置
+ ;; (setq dashboard-projects-backend 'projectile) ;; 读者可以暂时注释掉这一行，等安装了 projectile 后再使用
+ (setq dashboard-startup-banner 'official) ;; 也可以自定义图片
+ (setq dashboard-items '((recents  . 5)   ;; 显示多少个最近文件
+       (bookmarks . 5)  ;; 显示多少个最近书签
+       (projects . 10))) ;; 显示多少个最近项目
+ (dashboard-setup-startup-hook))
+
+;; tiny tiny-expand 序号扩展
+(use-package tiny :ensure t)
+
+;; highlight symbol 高亮所有光标所在处的符号
+(use-package highlight-symbol
+  :ensure t
+  :init (highlight-symbol-mode)
+  :bind ("<f3>" . highlight-symbol))
+
+;; rainbow delimiters 使用颜色标记多级括号
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 ;; 编程模式下代码语法检查
 (use-package flycheck
@@ -184,18 +303,13 @@
 
 (provide 'init)
 ;;; init.el ends here
-
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default))
- '(ispell-dictionary nil)
  '(package-selected-packages
-   '(marginalia which-key good-scroll smart-mode-line undo-tree mwim ace-window amx counsel ivy use-package)))
+   '(tiny cmake-mode which-key use-package-hydra undo-tree swiper-helm smart-mode-line rainbow-delimiters mwim multiple-cursors marginalia ivy-avy hydra highlight-symbol good-scroll flycheck embark dashboard counsel amx ace-window)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

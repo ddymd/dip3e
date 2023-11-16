@@ -47,8 +47,8 @@
 ;; 以下为可选
 ;;(savehist-mode 1)                                 ; 打开Buffer历史记录保存
 (setq display-line-numbers-type 'relative)        ; 显示相对行号
-(add-to-list 'default-frame-alist '(width . 118)) ; 设定启动图形界面时初始Frame宽度（字符数）
-(add-to-list 'default-frame-alist '(height . 80)) ; 设定启动图形界面时初始Frame高度（字符数）
+(add-to-list 'default-frame-alist '(width . 121)) ; 设定启动图形界面时初始Frame宽度（字符数）
+(add-to-list 'default-frame-alist '(height . 65)) ; 设定启动图形界面时初始Frame高度（字符数）
 
 ;; 配置快捷键
 (global-set-key (kbd "RET") 'newline-and-indent)  ; 新起一行并缩进
@@ -155,9 +155,15 @@
   ("q" nil "quit" :color blue)))
 
 ;; smart mode line (optional)
-;; (use-package smart-mode-line
-;;   :ensure t
-;;   :init (sml/setup))
+(use-package smart-mode-line
+  :ensure t
+  :init
+  (setq sml/no-confirm-load-theme t) ; avoid asking when startup
+  (sml/setup)
+  :config
+  (setq rm-blacklist (format "^ \\(%s\\)$" (mapconcat #'identity
+    '("Projectile.*" "company*" "Google" "Undo-Tree" "counsel" "ivy" "yas" "WK")
+    "\\|"))))
 
 ;; good scroll (optional)
 (use-package good-scroll
@@ -294,12 +300,19 @@ Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cu
   :ensure t
   :hook (prog-mode . rainbow-delimiters-mode))
 
+;; 插件 - 编程开发类 *********************************************************
+
 ;; 编程模式下代码语法检查
 (use-package flycheck
  :ensure t
  :hook
  (prog-mode . flycheck-mode))
 
+;; Themes
+(load-theme 'dracula t)
+
+(use-package all-the-icons
+  :if (display-graphic-p))
 
 (provide 'init)
 ;;; init.el ends here
@@ -308,11 +321,17 @@ Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cu
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(column-number-mode t)
+ '(custom-safe-themes
+   '("603a831e0f2e466480cdc633ba37a0b1ae3c3e9a4e90183833bc4def3421a961" default))
+ '(display-line-numbers-type 'relative)
+ '(global-display-line-numbers-mode t)
  '(package-selected-packages
-   '(tiny cmake-mode which-key use-package-hydra undo-tree swiper-helm smart-mode-line rainbow-delimiters mwim multiple-cursors marginalia ivy-avy hydra highlight-symbol good-scroll flycheck embark dashboard counsel amx ace-window)))
+   '(all-the-icons tiny cmake-mode which-key use-package-hydra undo-tree swiper-helm smart-mode-line rainbow-delimiters mwim multiple-cursors marginalia ivy-avy hydra highlight-symbol good-scroll flycheck embark dashboard counsel amx ace-window))
+ '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(default ((t (:family "SauceCodePro NFM" :foundry "outline" :slant normal :weight regular :height 110 :width normal)))))

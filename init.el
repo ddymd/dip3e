@@ -319,6 +319,9 @@ Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cu
 ;;   :if window-system
 ;;   :hook (company-mode . company-box-mode))
 
+;; 文本展开
+(global-set-key (kbd "M-/") 'hippie-expand)
+
 ;; 编程模式下代码语法检查
 (use-package flycheck
   :ensure t
@@ -326,13 +329,14 @@ Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cu
  :hook
  (prog-mode . flycheck-mode))
 
+;; Language Server Protocol 代码分析 - 前端
 (use-package lsp-mode
   :ensure t
   :init
   (setq lsp-keymap-prefix "C-c l" lsp-file-watch-threshold 500)
-  :hook (lsp-mode . lsp-enable-which-key-integration)
+  :hook (lsp-mode . lsp-enable-which-key-integration) ;; which key integration
   :config
-  ;;(setq lsp-completion-provider :none)
+  ;;(setq lsp-completion-provider :none) ;; 阻止lsp重新设置company-backend而覆盖yasnippet的设置
   (setq lsp-headerline-breadcrumb-enable t)
   :bind ("C-c l s" . lsp-ivy-workspace-symbol)) ;; 可快速搜索工作区内的符号（类名、函数名、变量名等）
 
@@ -346,12 +350,129 @@ Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cu
 
 (use-package lsp-ivy :ensure t :after (lsp-mode))
 
+;; 代码调试 Debug Adapter Protocol  前后端分离
+(use-package dap-mode
+  :ensure t
+  :after hydra lsp-mode
+  :commands dap-debug
+  :custom (dap-auto-configure-mode t)
+  :config (dap-ui-mode 1)
+  :hydra (hydra-dap-mode (:color pink :hint nil :foreign-keys run)
+			 "
+^Stepping^          ^Switch^                 ^Breakpoints^         ^Debug^                     ^Eval
+^^^^^^^^----------------------------------------------------------------------------------------------------------------
+_n_: Next           _ss_: Session            _bb_: Toggle          _dd_: Debug                 _ee_: Eval
+_i_: Step in        _st_: Thread             _bd_: Delete          _dr_: Debug recent          _er_: Eval region
+_o_: Step out       _sf_: Stack frame        _ba_: Add             _dl_: Debug last            _es_: Eval thing at point
+_c_: Continue       _su_: Up stack frame     _bc_: Set condition   _de_: Edit debug template   _ea_: Add expression.
+_r_: Restart frame  _sd_: Down stack frame   _bh_: Set hit count   _ds_: Debug restart
+_Q_: Disconnect     _sl_: List locals        _bl_: Set log message
+                  _sb_: List breakpoints
+                  _sS_: List sessions
+"
+   ("n" dap-next)
+   ("i" dap-step-in)
+   ("o" dap-step-out)
+   ("c" dap-continue)
+   ("r" dap-restart-frame)
+   ("ss" dap-switch-session)
+   ("st" dap-switch-thread)
+   ("sf" dap-switch-stack-frame)
+   ("su" dap-up-stack-frame)
+   ("sd" dap-down-stack-frame)
+   ("sl" dap-ui-locals)
+   ("sb" dap-ui-breakpoints)
+   ("sS" dap-ui-sessions)
+   ("bb" dap-breakpoint-toggle)
+   ("ba" dap-breakpoint-add)
+   ("bd" dap-breakpoint-delete)
+   ("bc" dap-breakpoint-condition)
+   ("bh" dap-breakpoint-hit-condition)
+   ("bl" dap-breakpoint-log-message)
+   ("dd" dap-debug)
+   ("dr" dap-debug-recent)
+   ("ds" dap-debug-restart)
+   ("dl" dap-debug-last)
+   ("de" dap-debug-edit-template)
+   ("ee" dap-eval)
+   ("ea" dap-ui-expressions-add)
+   ("er" dap-eval-region)
+   ("es" dap-eval-thing-at-point)
+   ("q" nil "quit" :color blue)
+   ("Q" dap-disconnect :color red)))
+
+;; 项目管理
+(use-package projectile
+  :ensure t
+  :bind ("C-c p" . projectile-command-map)
+  :config
+  (setq projectile-mode-line "Projectile")
+  (setq projectile-track-know-projects-automatically nil))
+
+(use-package counsel-projectile
+  :ensure t
+  :after (projectile)
+  :init (counsel-projectile-mode))
+
+;; 版本管理
+(use-package magit :ensure t)
+
+;; C++ lsp后端
 (use-package c++-mode
-  :functions c-toggle-hungry-state
+  :functions c-toggle-hungry-state ;; 按下删除键时尽可能多的删除空白字符
   :hook
   (c-mode . lsp-deferred)
   (c++-mode . lsp-deferred)
   (c++-mode . c-toggle-hungry-state))
+
+;; C++ dap后端
+(use-package dap-lldb
+  :after dap-mode
+  :custom (dap-lldb-debug-program '("lldb-vscode"))
+  (dap-lldb-debugged-program-function (lambda () (read-file-name "Select file to debug: "))))
+
+;; python lsp后端
+(use-package python
+  :defer t
+  :mode ("\\.py\\'" . python-mode)
+  :interpreter ("python" . python-mode)
+  :config (require 'dap-python)) ;; for debug
+;; M-x pyvenv-workon -> to find all miniconda envs
+(use-package pyvenv
+  :ensure t
+  :config (setenv "WORKON_HOME" (expand-file-name "C:\\Users\\Jack\\scoop\\persist\\miniconda3\\envs"))
+  ;;:config (setenv "WORKON_HOME" (expand-file-name "~/scoop/persist/miniconda3/envs"))
+  (pyvenv-mode t))
+  ;;:hook (python-mode . (lambda () (pyvenv-workon "..")))) ;; 启动后激活miniconda base env
+
+;; lsp后端
+(use-package lsp-pyright
+  :ensure t
+  :config
+  :hook (python-mode . (lambda () (require 'lsp-pyright) (lsp-deferred))))
+
+;; noetree theme
+(setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+
+(use-package neotree
+  :ensure t
+  :after projectile
+  :config
+  (setq neo-smart-open t)
+  ;; when running projectile switch project action neotree will change root automatically
+  (setq projectile-switch-project-action 'neotree-projectile-action))
+
+(defun neotree-project-dir()
+    "Open NeoTree using the git root."
+    (interactive)
+    (let ((project-dir (projectile-project-root))
+	  (file-name (buffer-file-name)))
+      (neotree-toggle)
+      (if project-dir (if (neo-global--window-exists-p)
+			  (progn (neotree-dir project-dir) (neotree-find file-name)))
+	(message "Could not find git project root."))))
+(global-set-key [f8] 'neotree-project-dir)
+;;(global-set-key (kbd "<f8>") 'neotree-project-dir)
 
 ;; Themes
 (load-theme 'dracula t)
@@ -373,7 +494,7 @@ Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cu
  '(global-display-line-numbers-mode t)
  '(ispell-dictionary nil)
  '(package-selected-packages
-   '(lsp-ivy lsp-ui lsp-mode company-tabnine company-box projectile company all-the-icons tiny cmake-mode which-key use-package-hydra undo-tree swiper-helm smart-mode-line rainbow-delimiters mwim multiple-cursors marginalia ivy-avy hydra highlight-symbol good-scroll flycheck embark dashboard counsel amx ace-window))
+   '(lsp-pyright pyvenv python-mode magit counsel-projectile dap-mode lsp-ivy lsp-ui lsp-mode company-tabnine company-box projectile company all-the-icons tiny cmake-mode which-key use-package-hydra undo-tree swiper-helm smart-mode-line rainbow-delimiters mwim multiple-cursors marginalia ivy-avy hydra highlight-symbol good-scroll flycheck embark dashboard counsel amx ace-window))
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

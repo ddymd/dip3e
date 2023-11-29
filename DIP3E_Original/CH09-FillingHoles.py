@@ -32,10 +32,11 @@ def fill_holes(bin_im, plot: plt.Axes = None):
     i, fill_im = dreconstruction(Ic==0, F, Se)
 
     if plot is not None:
-        plot.set_title('Filling holes')
+        plot.set_title('Filling holes: {}'.format(i))
         plot.set_xticks([])
         plot.set_yticks([])
         plot.imshow(fill_im, cmap='gray')
+    return F, Ic, fill_im
 
 if __name__ == '__main__':
     figure = plt.figure()
@@ -44,12 +45,27 @@ if __name__ == '__main__':
     gray_im = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
     _, bin_im = cv.threshold(gray_im, 127, 1, cv.THRESH_BINARY)
 
-    plot = figure.add_subplot(121)
+    plot = figure.add_subplot(221)
     plot.set_title('origin')
     plot.set_xticks([])
     plot.set_yticks([])
     plot.imshow(bin_im, cmap='gray')
 
-    fill_holes(bin_im, figure.add_subplot(122))
+    F, G, _ = fill_holes(bin_im, figure.add_subplot(224))
+
+    # 模版图像
+    gplot = figure.add_subplot(222)
+    gplot.set_title('G')
+    gplot.set_xticks([])
+    gplot.set_yticks([])
+    gplot.imshow(G, cmap='gray')
+    # 标记图像
+    fplot = figure.add_subplot(223)
+    fplot.set_title('F')
+    fplot.set_xticks([])
+    fplot.set_yticks([])
+    fplot.imshow(F, cmap='gray')
+
+    
 
     plt.show()

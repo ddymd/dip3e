@@ -12,7 +12,7 @@ def dreconstruction(G_arg, F, Se, i: int = 0):
     膨胀形态学重建
     G: 模版图像
     F: 标记图像
-    SE: 结构元
+    Se: 结构元
     '''
     i = i + 1
     dilate_im = cv.dilate(F, Se)

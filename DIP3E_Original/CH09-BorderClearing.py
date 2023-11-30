@@ -25,10 +25,8 @@ def border_clear(bin_im):
     Se = np.ones((3,3))
     F = bin_im.copy()
     F[1:-2, 1:-2] = 0
-
+    # 膨胀形态学重建
     i, x = dilate_reconstruction(bin_im==0, F, Se)
-
-    print(i)
 
     return i, x, bin_im - x
 

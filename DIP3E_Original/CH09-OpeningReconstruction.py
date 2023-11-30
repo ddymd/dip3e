@@ -7,22 +7,24 @@ import cv2
 import numpy as np
 import matplotlib.pylab as plt
 
-def obrc(bin_im, zero_arg, i: int = 0):
+def obrc(F, G_arg, i: int = 0):
     '''重建开运算 Opening By Reconstruction'''
     dilate_kernel = np.ones((3,3))
-    dilate_im = cv2.dilate(bin_im, dilate_kernel)
-    dilate_im[zero_arg] = 0
+    dilate_im = cv2.dilate(F, dilate_kernel)
+    dilate_im[G_arg] = 0
     i = i + 1
-    if (bin_im == dilate_im).all():
+    if (F == dilate_im).all():
         return i, dilate_im
-    return obrc(dilate_im, zero_arg, i)
+    return obrc(dilate_im, G_arg, i)
 
 def reconstruction(bin_im, plot: plt.Axes = None):
-    # 获取锚点
+    # 构建标记图像
     mark_kernel = np.ones((51,1))
-    mark_im = cv2.erode(bin_im, mark_kernel)
+    F = cv2.erode(bin_im, mark_kernel)
+    # 模版图像为原图I
+    G_arg = bin_im == 0
     # 重建开运算
-    loop_count, recons_im = obrc(mark_im, bin_im == 0)
+    loop_count, recons_im = obrc(F, G_arg)
 
     if plot is not None:
         plot.set_title('reconstruction: {}'.format(loop_count))

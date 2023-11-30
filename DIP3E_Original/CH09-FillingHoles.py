@@ -23,11 +23,18 @@ def dreconstruction(G_arg, F, Se, i: int = 0):
 
 
 def fill_holes(bin_im, plot: plt.Axes = None):
+    '''
+    孔洞填充
+    模版图像: 原图I的补集Ic
+    标记图像: 1-I(x,y) @图像边界
+            0 @ 其他
+    '''
+    # 标记图像
     F = 1 - bin_im
     F[1:-2,1:-2] = 0
-
+    # 模版图像
     Ic = 1 - bin_im
-
+    # 结构元
     Se = np.ones((3,3))
     i, fill_im = dreconstruction(Ic==0, F, Se)
 
@@ -53,19 +60,17 @@ if __name__ == '__main__':
 
     F, G, _ = fill_holes(bin_im, figure.add_subplot(224))
 
-    # 模版图像
+    # 展示模版图像
     gplot = figure.add_subplot(222)
     gplot.set_title('G')
     gplot.set_xticks([])
     gplot.set_yticks([])
     gplot.imshow(G, cmap='gray')
-    # 标记图像
+    # 展示标记图像
     fplot = figure.add_subplot(223)
     fplot.set_title('F')
     fplot.set_xticks([])
     fplot.set_yticks([])
     fplot.imshow(F, cmap='gray')
-
-    
 
     plt.show()

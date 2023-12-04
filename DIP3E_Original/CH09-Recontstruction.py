@@ -95,6 +95,7 @@ if __name__ == "__main__":
     mdplot.set_yticks([])
     mdplot.imshow(min_im, cmap='gray')
 
+    # TODO: the mask image is not matched with book!!!
     i, res_im = grayscale_dilate_reconstruction(min_im, th_im, np.ones((3,3)))
     resplot = figure.add_subplot(339)
     resplot.set_title('res: {}'.format(i))

@@ -42,32 +42,21 @@ def main():
     x2 = x.copy()
     x2[x2 <= xm] = 0
 
-    # xx = x1 + x2
-
-    # x1plot = figure.add_subplot(223)
-    # x1plot.set_title('x1')
-    # x1plot.set_xticks([])
-    # x1plot.set_yticks([])
-    # x1plot.imshow(x1, cmap='gray')
-
-    # x2plot = figure.add_subplot(224)
-    # x2plot.set_title('x2')
-    # x2plot.set_xticks([])
-    # x2plot.set_yticks([])
-    # x2plot.imshow(x2, cmap='gray')
     # 曝光度E - 图像的曝光水平
     E = (pk * np.arange(256)).sum() / 256
     alpha = E if E <= 0.5 else 1 - E
     print('E={}, alpha={}'.format(E, alpha))
 
     # 对子图像进行自适应加权校正
-    h_max, h_min = np.max(hk), np.min(hk)
+    # h_max, h_min = np.max(hk), np.min(hk)
+    # print('hk max={}, min={}'.format(h_max, h_min))
 
     x1_w1 = 1 - xm/L
     x1_w2 = 1
     x1_w3 = 1 + xm/L
 
     hk1 = np.asarray(cv.calcHist([x1], [0], None, [256], [0, 256])).ravel()
+    h_max, h_min = np.max(hk1), np.min(hk1)
     x1_k = (hk1 - h_min) / (h_max-h_min)
     x1_hck = (h_max * np.float_power(x1_k, alpha * x1_w1) +
             h_max * np.float_power(x1_k, alpha * x1_w2) +
@@ -78,11 +67,17 @@ def main():
 
     f1_k = xm * (cc1_k - 0.5 * pc1_k)
 
+    # print('x1_k:\n{}'.format(x1_k))
+    # print('pc1_k:\n{}'.format(pc1_k))
+    # print('cc1_k:\n{}'.format(cc1_k))
+    # print(f1_k)
+
     x2_w1 = 1 - (L-xm)/L
     x2_w2 = 1
     x2_w3 = 1 + (L-xm)/L
 
     hk2 = np.asarray(cv.calcHist([x2], [0], None, [256], [0, 256])).ravel()
+    h_max, h_min = np.max(hk2), np.min(hk2)
     x2_k = (hk2 - h_min) / (h_max-h_min)
     x2_hck = (h_max * np.float_power(x2_k, alpha * x2_w1) +
             h_max * np.float_power(x2_k, alpha * x2_w2) +
@@ -92,6 +87,10 @@ def main():
     cc2_k = pc2_k.cumsum()
 
     f2_k = xm + 1 + (L - xm - 2)*(cc2_k - 0.5 * pc2_k)
+    # print('x2_k:\n{}'.format(x2_k))
+    # print('pc2_k:\n{}'.format(pc2_k))
+    # print('cc2_k:\n{}'.format(cc2_k))
+    # print(f2_k)
 
     res = im.copy()
     rows, cols = im.shape[:2]

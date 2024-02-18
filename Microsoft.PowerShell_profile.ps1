@@ -1,8 +1,3 @@
-#region conda initialize
-# !! Contents within this block are managed by 'conda init' !!
-# (& "C:\Users\Jack\scoop\apps\miniconda3\current\Scripts\conda.exe" "shell.powershell" "hook") | Out-String | Invoke-Expression
-#endregion
-
 #oh-my-posh init pwsh --config "$(scoop prefix oh-my-posh)\themes\jandedobbeleer.omp.json" | Invoke-Expression
 #oh-my-posh init pwsh --config "$Env:POSH_THEMES_PATH\powerlevel10k_lean.omp.json" | Invoke-Expression
 #oh-my-posh init pwsh --config "$Env:POSH_THEMES_PATH\sorin.omp.json" | Invoke-Expression
@@ -66,3 +61,8 @@ Set-PSReadLineKeyHandler -Chord Ctrl+r -ScriptBlock {
 	$command = Get-Content (Get-PSReadlineOption).HistorySavePath | awk '!a[$0]++' | fzf --tac
 	[Microsoft.PowerShell.PSConsoleReadLine]::Insert($command)
 }
+
+#region conda initialize
+# !! Contents within this block are managed by 'conda init' !!
+# (& "C:\Users\Jack\scoop\apps\miniconda3\current\Scripts\conda.exe" "shell.powershell" "hook") | Out-String | Invoke-Expression
+#endregion
